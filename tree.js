@@ -575,7 +575,7 @@ function GetMinKey(node) {
 async function MergeButton() {
   ErrorHandler("Everything is ok!");
   ShowAlgorithmPlan(merge_plan);
-  await Wait(1700);
+  current_message = "Current step: " + "Starting merge operation.";
   if (cur_tree.length !== 0) {
     ErrorHandler("Build operation is not finished!");
     return;
@@ -639,6 +639,7 @@ async function SplitButton() {
   ErrorHandler("Everything is ok!");
   GoToLastStep();
   ShowAlgorithmPlan(split_plan);
+  current_message = "Current step: " + "Starting split operation.";
   if (cur_tree.length !== 0) {
     ErrorHandler("Build operation is not finished!");
     return;
@@ -693,6 +694,7 @@ async function InsertButton() {
   ErrorHandler("Everything is ok!");
   GoToLastStep();
   ShowAlgorithmPlan(insert_plan);
+  current_message = "Current step: " + "Starting insert operation.";
   if (cur_tree.length !== 0) {
     ErrorHandler("Build operation is not finished!");
     return;
@@ -749,11 +751,16 @@ async function InsertButton() {
   node.node_color = light_blue;
   UndrawTree();
   node_array.push(node);
+  CopyState();
+  let state_count = state_array.length;
   let split_result = Split(root, key);
   current_message = "Current step: " + "Split is done!";
   CopyState();
   if (split_result.first === null || split_result.second === null) {
-    state_array = [];
+    state_array.splice(state_count, state_array.length - state_count);
+    for (let i = 0; i < node_array.length; ++i) {
+      node_array[i].node_color = purple;
+    }
   }
   if (split_result.first !== null) {
     node = Merge(split_result.first, node);
@@ -786,6 +793,7 @@ async function DeleteButton() {
   ErrorHandler("Everything is ok!");
   GoToLastStep();
   ShowAlgorithmPlan(delete_plan);
+  current_message = "Current step: " + "Starting delete operation.";
   if (cur_tree.length !== 0) {
     ErrorHandler("Build operation is not finished!");
     return;
@@ -840,6 +848,9 @@ async function DeleteButton() {
   CopyState();
   if (split_result.second === null) {
     state_array.splice(state_count, state_array.length - state_count);
+    for (let i = 0; i < node_array.length; ++i) {
+      node_array[i].node_color = purple;
+    }
   }
   state_count = state_array.length;
   let second_split_result = Split(split_result.first, key - 1);
@@ -847,6 +858,9 @@ async function DeleteButton() {
   CopyState();
   if (second_split_result.first === null) {
     state_array.splice(state_count, state_array.length - state_count);
+    for (let i = 0; i < node_array.length; ++i) {
+      node_array[i].node_color = purple;
+    }
   }
   if (second_split_result.second === null) {
     Merge(second_split_result.first, split_result.second);
@@ -911,8 +925,11 @@ async function BuildRandomTreeButton() {
   if (nodes_count < 1) {
     ErrorHandler("Nodes count should be positive!");
   }
-  console.log(randomness);
   possible_keys = [];
+  possible_priorities = [];
+  for (let priority = 1; priority <= grid_cell_height; ++priority) {
+    possible_priorities.push(priority);
+  }
   for (let key = 1; key <= grid_cell_width; ++key) {
     let is_possible_key = true;
     for (let i = 0; i < node_array.length; ++i) {
@@ -940,11 +957,21 @@ async function BuildRandomTreeButton() {
     }
     random_keys.push(possible_keys[random_index]);
     possible_keys.splice(random_index, 1);
-    let random_priority = Math.floor(Math.random() * grid_cell_height) + 1;
-    if (random_priority > grid_cell_height) {
-      random_priority = grid_cell_height;
+    if (possible_priorities.length === 0) {
+      let new_random_priority =
+        Math.floor(Math.random() * grid_cell_height) + 1;
+      if (new_random_priority >= grid_cell_height) {
+        new_random_priority = grid_cell_height;
+      }
+      possible_priorities.push(new_random_priority);
     }
-    random_priorities.push(random_priority);
+    let random_priority =
+      Math.floor(Math.random() * possible_priorities.length) + 1;
+    if (random_priority >= possible_priorities.length) {
+      random_priority = possible_priorities.length - 1;
+    }
+    random_priorities.push(possible_priorities[random_priority]);
+    possible_priorities.splice(random_priority, 1);
   }
   if (Math.random() >= 0.5) {
     random_priorities.sort((a, b) => a - b);
@@ -993,13 +1020,27 @@ async function RerandomizePrioritiesButton() {
   }
   let randomness = Number(document.getElementById("priority-randomness").value);
   UndrawTree();
+  possible_priorities = [];
+  for (let priority = 1; priority <= grid_cell_height; ++priority) {
+    possible_priorities.push(priority);
+  }
   let random_priorities = [];
   for (let i = 0; i < node_array.length; ++i) {
-    let random_priority = Math.floor(Math.random() * grid_cell_height) + 1;
-    if (random_priority > grid_cell_height) {
-      random_priority = grid_cell_height;
+    if (possible_priorities.length === 0) {
+      let new_random_priority =
+        Math.floor(Math.random() * grid_cell_height) + 1;
+      if (new_random_priority >= grid_cell_height) {
+        new_random_priority = grid_cell_height;
+      }
+      possible_priorities.push(new_random_priority);
     }
-    random_priorities.push(random_priority);
+    let random_priority =
+      Math.floor(Math.random() * possible_priorities.length) + 1;
+    if (random_priority >= possible_priorities.length) {
+      random_priority = possible_priorities.length - 1;
+    }
+    random_priorities.push(possible_priorities[random_priority]);
+    possible_priorities.splice(random_priority, 1);
   }
   if (Math.random() >= 0.5) {
     random_priorities.sort((a, b) => a - b);
