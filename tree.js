@@ -550,6 +550,7 @@ async function ClearAllButton() {
   current_message = "";
   ErrorHandler("Everything is ok!");
   ShowStepMessage();
+  ShowAlgorithmPlan("");
   GoToLastStep();
   UndrawTree();
   cur_tree.splice(0, cur_tree.length);
@@ -577,7 +578,9 @@ async function MergeButton() {
   ShowAlgorithmPlan(merge_plan);
   current_message = "Current step: " + "Starting merge operation.";
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let key1 = Number(document.getElementById("merge-root-key-1").value);
@@ -641,7 +644,9 @@ async function SplitButton() {
   ShowAlgorithmPlan(split_plan);
   current_message = "Current step: " + "Starting split operation.";
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let root_key = Number(document.getElementById("split-root-key").value);
@@ -696,7 +701,9 @@ async function InsertButton() {
   ShowAlgorithmPlan(insert_plan);
   current_message = "Current step: " + "Starting insert operation.";
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let key = Number(document.getElementById("insert-delete-key").value);
@@ -795,7 +802,9 @@ async function DeleteButton() {
   ShowAlgorithmPlan(delete_plan);
   current_message = "Current step: " + "Starting delete operation.";
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let key = Number(document.getElementById("insert-delete-key").value);
@@ -872,6 +881,23 @@ async function DeleteButton() {
     ErrorHandler("No node with such key and priority in this tree!");
     return;
   }
+  if (
+    second_split_result.second.x !== key ||
+    second_split_result.second.y !== priority
+  ) {
+    second_split_result.first = Merge(
+      second_split_result.first,
+      second_split_result.second
+    );
+    Merge(second_split_result.first, split_result.second);
+    state_array = [];
+    for (let i = 0; i < node_array.length; ++i) {
+      node_array[i].node_color = purple;
+    }
+    DrawTree();
+    ErrorHandler("No node with such key and priority in this tree!");
+    return;
+  }
   for (let i = 0; i < node_array.length; ++i) {
     if (
       node_array[i].x === second_split_result.second.x &&
@@ -913,7 +939,9 @@ async function BuildRandomTreeButton() {
   ErrorHandler("Everything is ok!");
   GoToLastStep();
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let nodes_count = Number(document.getElementById("random-nodes-count").value);
@@ -979,8 +1007,9 @@ async function BuildRandomTreeButton() {
     random_priorities.sort((a, b) => b - a);
   }
   random_keys.sort((a, b) => a - b);
+  randomness = 100 * Math.sqrt(randomness / 100);
   for (let i = 0; i < random_priorities.length; ++i) {
-    if (Math.floor(Math.random() * 100) <= randomness) {
+    if (Math.floor(Math.random() * 100) < randomness) {
       let swap_index = Math.floor(Math.random() * i) + 1;
       if (swap_index > i) {
         swap_index = i;
@@ -1015,7 +1044,9 @@ async function RerandomizePrioritiesButton() {
   ErrorHandler("Everything is ok!");
   GoToLastStep();
   if (cur_tree.length !== 0) {
-    ErrorHandler("Build operation is not finished!");
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
     return;
   }
   let randomness = Number(document.getElementById("priority-randomness").value);
@@ -1047,8 +1078,9 @@ async function RerandomizePrioritiesButton() {
   } else {
     random_priorities.sort((a, b) => b - a);
   }
+  randomness = 100 * Math.sqrt(randomness / 100);
   for (let i = 0; i < random_priorities.length; ++i) {
-    if (Math.floor(Math.random() * 100) <= randomness) {
+    if (Math.floor(Math.random() * 100) < randomness) {
       let swap_index = Math.floor(Math.random() * i) + 1;
       if (swap_index > i) {
         swap_index = i;
@@ -1074,5 +1106,123 @@ async function RerandomizePrioritiesButton() {
       cur_tree = [];
     }
   }
+  DrawTree();
+}
+
+function AddCustomNode(x, y) {
+  node = new Node(x, y);
+  cur_tree.push(node);
+  node_array.push(node);
+}
+
+async function SplitExample1Button() {
+  if (cur_tree.length !== 0) {
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
+    return;
+  }
+  ClearAllButton();
+  ShowAlgorithmPlan("Try split with root key 18 and split key 7!");
+  AddCustomNode(18, 18);
+  AddCustomNode(2, 16);
+  AddCustomNode(17, 15);
+  AddCustomNode(3, 13);
+  AddCustomNode(15, 12);
+  AddCustomNode(4, 9);
+  AddCustomNode(12, 7);
+  AddCustomNode(6, 4);
+  AddCustomNode(11, 1);
+  AddCustomNode(22, 13);
+  AddCustomNode(20, 2);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
+  DrawTree();
+}
+
+async function SplitExample2Button() {
+  if (cur_tree.length !== 0) {
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
+    return;
+  }
+  ClearAllButton();
+  ShowAlgorithmPlan("Try split with root key 3 and split key 14!");
+  AddCustomNode(3, 18);
+  AddCustomNode(5, 16);
+  AddCustomNode(8, 14);
+  AddCustomNode(12, 12);
+  AddCustomNode(20, 10);
+  AddCustomNode(19, 8);
+  AddCustomNode(17, 7);
+  AddCustomNode(13, 6);
+  AddCustomNode(16, 2);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
+  DrawTree();
+}
+
+async function MergeExample1Button() {
+  if (cur_tree.length !== 0) {
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
+    return;
+  }
+  ClearAllButton();
+  ShowAlgorithmPlan("Try merge with left root key 6 and right root key 15!");
+  AddCustomNode(1, 6);
+  AddCustomNode(2, 14);
+  AddCustomNode(3, 10);
+  AddCustomNode(6, 18);
+  AddCustomNode(7, 6);
+  AddCustomNode(8, 2);
+  AddCustomNode(9, 15);
+  AddCustomNode(10, 4);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
+  AddCustomNode(12, 10);
+  AddCustomNode(13, 5);
+  AddCustomNode(14, 13);
+  AddCustomNode(15, 17);
+  AddCustomNode(17, 12);
+  AddCustomNode(19, 14);
+  AddCustomNode(20, 2);
+  AddCustomNode(21, 6);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
+  DrawTree();
+}
+
+async function MergeExample2Button() {
+  if (cur_tree.length !== 0) {
+    ErrorHandler(
+      "Build operation is not finished! Use clear or build function to continue."
+    );
+    return;
+  }
+  ClearAllButton();
+  ShowAlgorithmPlan("Try merge with left root key 2 and right root key 20!");
+  AddCustomNode(2, 18);
+  AddCustomNode(3, 14);
+  AddCustomNode(5, 11);
+  AddCustomNode(6, 4);
+  AddCustomNode(7, 1);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
+  AddCustomNode(20, 17);
+  AddCustomNode(19, 15);
+  AddCustomNode(17, 12);
+  AddCustomNode(14, 7);
+  AddCustomNode(13, 2);
+  cur_tree.sort((a, b) => a.x - b.x);
+  BuildTree(cur_tree);
+  cur_tree = [];
   DrawTree();
 }
